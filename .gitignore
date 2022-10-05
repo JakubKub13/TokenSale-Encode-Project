@@ -4,8 +4,13 @@ coverage
 coverage.json
 typechain
 typechain-types
+deployments
+.vscode
 
 #Hardhat files
 cache
 artifacts
-
+gas-report.txt
+coverage.json
+coverage
+.DS_Store
