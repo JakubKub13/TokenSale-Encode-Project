@@ -45,15 +45,19 @@ describe("NFT Shop", () => {
         beforeEach(async () => {
             const purchaseTokenTx = await tokenSaleContract.connect(acc2).purchaseTokens({value: amountToBeSentBn});
             await purchaseTokenTx.wait();
-        it("charges the correct amount of ETH", () => {
+        });
+        
+        it("charges the correct amount of ETH", async () => {
             throw new Error("Not implemented");
         });
+        
 
-        it("gives the correct amount of tokens", () => {
-            throw new Error("Not implemented");
+        it("gives the correct amount of tokens", async () => {
+            const acc2Balance = await erc20Token.balanceOf(acc2.address);
+            expect(acc2Balance).to.eq(amountToBeSentBn.div(ERC20_TOKEN_RATIO));
         });
-    });
-
+    })
+    
   describe("When a user burns an ERC20 at the Token contract", () => {
     it("gives the correct amount of ETH", () => {
       throw new Error("Not implemented");
