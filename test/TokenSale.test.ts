@@ -15,7 +15,7 @@ describe("NFT Shop", () => {
     beforeEach(async () => {
         [deployer, acc1, acc2] = await ethers.getSigners();
         const erc20TokenFactory = await ethers.getContractFactory("MyERC20")
-        const erc20Token = await erc20TokenFactory.deploy();
+        erc20Token = await erc20TokenFactory.deploy();
         await erc20Token.deployed();
         const tokenSaleContractFactory = await ethers.getContractFactory("TokenSale");
         tokenSaleContract = await tokenSaleContractFactory.deploy(ERC20_TOKEN_RATIO, erc20Token.address);
@@ -40,15 +40,19 @@ describe("NFT Shop", () => {
         });
     });
 
-  describe("When a user purchase an ERC20 from the Token contract", () => {
-    it("charges the correct amount of ETH", () => {
-      throw new Error("Not implemented");
-    });
+    describe("When a user purchase an ERC20 from the Token contract", () => {
+        let amountToBeSentBn = ethers.utils.parseEther("1");
+        beforeEach(async () => {
+            const purchaseTokenTx = await tokenSaleContract.connect(acc2).purchaseTokens({value: amountToBeSentBn});
+            await purchaseTokenTx.wait();
+        it("charges the correct amount of ETH", () => {
+            throw new Error("Not implemented");
+        });
 
-    it("gives the correct amount of tokens", () => {
-      throw new Error("Not implemented");
+        it("gives the correct amount of tokens", () => {
+            throw new Error("Not implemented");
+        });
     });
-  });
 
   describe("When a user burns an ERC20 at the Token contract", () => {
     it("gives the correct amount of ETH", () => {
