@@ -31,10 +31,14 @@ describe("NFT Shop", () => {
             expect(rate).to.eq(ERC20_TOKEN_RATIO)
         });
 
-        it("uses a valid ERC20 as payment token", () => {
-            throw new Error("Not implemented");
+        it("uses a valid ERC20 as payment token", async () => {
+            const paymentTokenAddress = await tokenSaleContract.paymentToken();
+            const erc20TokenFactory = await ethers.getContractFactory("MyERC20");
+            const paymentTokenContract = erc20TokenFactory.attach(paymentTokenAddress);
+            const totalSupply = await paymentTokenContract.totalSupply();
+            expect(totalSupply).to.eq(0)
+        });
     });
-  });
 
   describe("When a user purchase an ERC20 from the Token contract", () => {
     it("charges the correct amount of ETH", () => {
