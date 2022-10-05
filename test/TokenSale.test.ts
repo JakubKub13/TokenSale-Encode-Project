@@ -40,4 +40,23 @@ describe("NFT Shop", () => {
         });
     });
 
+    describe("When a user purchase an ERC20 from the Token contract", () => {
+        let amountToBeSentBn = ethers.utils.parseEther("1");
+        beforeEach(async () => {
+            const purchaseTokenTx = await tokenSaleContract.connect(acc2).purchaseTokens({value: amountToBeSentBn});
+            await purchaseTokenTx.wait();
+            console.log(purchaseTokenTx)
+        });
+
+        it("Charges the correct amount of ETH", async () => {
+            throw new Error("Not implemented");
+        });
+
+        it("Gives the correct amount of tokens", async () => {
+            const acc2Balance = await erc20Token.balanceOf(acc2.address);
+            console.log(acc2Balance);
+            expect(acc2Balance).to.eq(amountToBeSentBn.div(ERC20_TOKEN_RATIO));
+        })
+    })
+
 })
