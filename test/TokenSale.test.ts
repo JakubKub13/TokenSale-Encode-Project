@@ -49,7 +49,7 @@ describe("NFT Shop", () => {
         const amountToBeSentBn = ethers.utils.parseEther("1");
         const amountToBeReceived = amountToBeSentBn.div(ERC20_TOKEN_RATIO);
         let balanceBeforeBn: BigNumber;
-        let gasCosts: BigNumber;
+        let purchaseGasCosts: BigNumber;
         
         beforeEach(async () => {
             balanceBeforeBn = await acc1.getBalance();
@@ -57,13 +57,13 @@ describe("NFT Shop", () => {
             const purchaseTokenTxReceipt = await purchaseTokenTx.wait();
             const gasUnitUsed = purchaseTokenTxReceipt.gasUsed;
             const gasPrice = purchaseTokenTxReceipt.effectiveGasPrice;
-            gasCosts = gasUnitUsed.mul(gasPrice);
+            purchaseGasCosts = gasUnitUsed.mul(gasPrice);
         });
         
         it("charges the correct amount of ETH", async () => {
             const balanceAfterBn = await acc1.getBalance();
             const diff = balanceBeforeBn.sub(balanceAfterBn);
-            const expectedDiff = amountToBeSentBn.add(gasCosts);
+            const expectedDiff = amountToBeSentBn.add(purchaseGasCosts);
             const error = diff.sub(expectedDiff);
             expect(error).to.eq(0);
         });
@@ -79,17 +79,21 @@ describe("NFT Shop", () => {
             expect(contractBalanceBn).to.eq(amountToBeSentBn);
         });
     
-    
         describe("When a user burns an ERC20 at the Token contract", () => {
-            let balanceBeforeBn: BigNumber;
-            let gasCosts: BigNumber;
+            let burnGasCosts: BigNumber;
+            let approveGasCosts: BigNumber;
         
             beforeEach(async () => {
+                const approveTx = await erc20Token.approve(tokenSaleContract.address, amountToBeReceived);
+                const approveTxReceipt = await approveTx.wait();
+                const approveGasUnitUsed = approveTxReceipt.gasUsed;
+                const approveGasPrice = approveTxReceipt.effectiveGasPrice;
+                burnGasCosts = approveGasUnitUsed.mul(approveGasPrice);
                 const burnTokenTx = await tokenSaleContract.connect(acc2).burnTokens(amountToBeReceived);
                 const burnTokensTxReceipt = await burnTokenTx.wait();
-                const gasUnitUsed = burnTokensTxReceipt.gasUsed;
-                const gasPrice = burnTokensTxReceipt.effectiveGasPrice;
-                gasCosts = gasUnitUsed.mul(gasPrice);
+                const burnGasUnitUsed = burnTokensTxReceipt.gasUsed;
+                const burnGasPrice = burnTokensTxReceipt.effectiveGasPrice;
+                burnGasCosts = burnGasUnitUsed.mul(burnGasPrice);
             });
 
             it("gives the correct amount of ETH", async () => {
