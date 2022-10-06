@@ -2,26 +2,29 @@
 pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract BasicNFT is ERC721 {
-    string public constant TOKEN_URI = "ipfs://bafybeig37ioir76s7mg5oobetncojcm3c3hxasyd4rvid4jqhy4gkaheg4/?filename=0-PUG.json";
-    uint256 private s_tokenCounter;
-    constructor() ERC721("Doggie", "DOD") {
-        s_tokenCounter = 0;
+contract MyERC721 is ERC721, ERC721Burnable, AccessControl {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    constructor() ERC721("MyToken", "MTK") {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, msg.sender);
     }
 
-    function mintNFT() public returns (uint256) {
-        _safeMint(msg.sender, s_tokenCounter);
-        s_tokenCounter = s_tokenCounter + 1;
-        return s_tokenCounter;
+    function safeMint(address to, uint256 tokenId) public onlyRole(MINTER_ROLE) {
+        _safeMint(to, tokenId);
     }
 
-    function tokenURI(uint256 /* tokenId */) public view override returns (string memory) {
-        // require(_exists(tokenId))
-        return TOKEN_URI;
-    }
+    // The following functions are overrides required by Solidity.
 
-    function getTokenCounter() public view returns (uint256) {
-        return s_tokenCounter;
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, AccessControl)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

@@ -45,7 +45,7 @@ describe("NFT Shop", () => {
         });
     });
 
-    describe("When a user purchase an ERC20 from the Token contract", async () => {
+    describe("When a user purchase an ERC20 from the Token contract", () => {
         const amountToBeSentBn = ethers.utils.parseEther("1");
         const amountToBeReceived = amountToBeSentBn.div(ERC20_TOKEN_RATIO);
         let balanceBeforeBn: BigNumber;
@@ -111,25 +111,26 @@ describe("NFT Shop", () => {
                 expect(totalSupply).to.eq(0);
             });
         });
-    });
+    
 
-  describe("When a user purchase a NFT from the Shop contract", () => {
-    it("charges the correct amount of ETH", () => {
-      throw new Error("Not implemented");
-    });
+        describe("When a user purchase a NFT from the Shop contract", () => {
+            it("charges the correct amount of ETH", () => {
+                throw new Error("Not implemented");
+            });
 
-    it("updates the owner account correctly", () => {
-      throw new Error("Not implemented");
-    });
+            it("updates the owner account correctly", () => {
+                throw new Error("Not implemented");
+            });
 
-    it("update the pool account correctly", () => {
-      throw new Error("Not implemented");
-    });
+            it("update the pool account correctly", () => {
+                throw new Error("Not implemented");
+            });
 
-    it("favors the pool with the rounding", () => {
-      throw new Error("Not implemented");
+            it("favors the pool with the rounding", () => {
+            throw new Error("Not implemented");
+            });
+        });
     });
-  });
 
   describe("When a user burns their NFT at the Shop contract", () => {
     it("gives the correct amount of ERC20 tokens", () => {

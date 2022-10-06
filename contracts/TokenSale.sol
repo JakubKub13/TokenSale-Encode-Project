@@ -11,7 +11,7 @@ interface IMyERC20Token is IERC20 {
 
 interface IMyERC721Token is IERC721 {
     function safeMint(address to, uint256 tokenId) external;
-    function burnFrom(address from, uint256 amount) external;
+    function burn(uint256 tokenId) external;
 }
 
 
@@ -21,6 +21,8 @@ contract TokenSale {
     uint256 public tokenPrice;
     IMyERC20Token public paymentToken;
     IMyERC721Token public nftContract;
+    uint256 public adminPool;
+    uint256 public publicPool;
 
 
     constructor(uint256 _ratio, uint256 _tokenPrice, address _paymentToken, address _nftContract) {
@@ -43,7 +45,15 @@ contract TokenSale {
     }
 
     function purchaseNFT(uint256 tokenId) public {
+        uint256 charge = tokenPrice / 2;
+        adminPool += charge;
+        publicPool += tokenPrice - charge;
         paymentToken.transferFrom(msg.sender, address(this), tokenPrice);
-        nftContract.safeMint((msg.sender), tokenId);
+        nftContract.safeMint((msg.sender), tokenId);  
+    }
+
+    function burnNFT(uint256 tokenId) public {
+        nftContract.burn(tokenId);
+        paymentToken.transfer(msg.sender, tokenPrice / 2);
     }
 }
