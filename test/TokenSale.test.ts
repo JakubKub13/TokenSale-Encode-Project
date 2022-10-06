@@ -62,7 +62,7 @@ describe("NFT Shop", () => {
         it("charges the correct amount of ETH", async () => {
             const balanceAfterBn = await acc1.getBalance();
             const diff = balanceBeforeBn.sub(balanceAfterBn);
-            const expectedDiff = amountToBeSentBn;
+            const expectedDiff = amountToBeSentBn.add(gasCosts);
             const error = diff.sub(expectedDiff);
             expect(error).to.eq(0);
         });
@@ -72,7 +72,12 @@ describe("NFT Shop", () => {
             const acc2Balance = await erc20Token.balanceOf(acc2.address);
             expect(acc2Balance).to.eq(amountToBeSentBn.div(ERC20_TOKEN_RATIO));
         });
-    })
+
+        it("Increases the balance of ETH in the contract", async () => {
+            const contractBalanceBn = await ethers.provider.getBalance(tokenSaleContract.address);
+            expect(contractBalanceBn).to.eq(amountToBeSentBn);
+        });
+    });
     
     describe("When a user burns an ERC20 at the Token contract", () => {
         
