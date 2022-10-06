@@ -3,6 +3,8 @@ pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 
 interface IMyERC20Token is IERC20 {
     function mint(address to, uint256 amount) external;
@@ -15,7 +17,7 @@ interface IMyERC721Token is IERC721 {
 }
 
 
-contract TokenSale {
+contract TokenSale is Ownable {
     /// @notice Purchase Ratio between Sale ERC20 and Ether
     uint256 public erc20Purchaseratio;
     uint256 public tokenPrice;
@@ -55,5 +57,11 @@ contract TokenSale {
     function burnNFT(uint256 tokenId) public {
         nftContract.burn(tokenId);
         paymentToken.transfer(msg.sender, tokenPrice / 2);
+    }
+
+    function withdraw(uint256 amount) public onlyOwner {
+        require(amount <= adminPool);
+        adminPool -= amount;
+        paymentToken.transfer(msg.sender, amount);
     }
 }
