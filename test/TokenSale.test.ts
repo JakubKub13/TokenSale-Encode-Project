@@ -84,11 +84,11 @@ describe("NFT Shop", () => {
             let approveGasCosts: BigNumber;
         
             beforeEach(async () => {
-                const approveTx = await erc20Token.approve(tokenSaleContract.address, amountToBeReceived);
+                const approveTx = await erc20Token.connect(acc2).approve(tokenSaleContract.address, amountToBeReceived);
                 const approveTxReceipt = await approveTx.wait();
                 const approveGasUnitUsed = approveTxReceipt.gasUsed;
                 const approveGasPrice = approveTxReceipt.effectiveGasPrice;
-                burnGasCosts = approveGasUnitUsed.mul(approveGasPrice);
+                approveGasCosts = approveGasUnitUsed.mul(approveGasPrice);
                 const burnTokenTx = await tokenSaleContract.connect(acc2).burnTokens(amountToBeReceived);
                 const burnTokensTxReceipt = await burnTokenTx.wait();
                 const burnGasUnitUsed = burnTokensTxReceipt.gasUsed;
@@ -102,8 +102,10 @@ describe("NFT Shop", () => {
             });
 
             it("burns the correct amount of tokens", async () => {
-            
-
+                const acc2Balance = await erc20Token.balanceOf(acc2.address);
+                expect(acc2Balance).to.eq(0);
+                const totalSupply = await erc20Token.totalSupply();
+                expect(totalSupply).to.eq(0);
             });
         });
     });
