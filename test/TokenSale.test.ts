@@ -46,19 +46,17 @@ describe("NFT Shop", () => {
     });
 
     describe("When a user purchase an ERC20 from the Token contract", async () => {
-        let amountToBeSentBn = ethers.utils.parseEther("1");
+        const amountToBeSentBn = ethers.utils.parseEther("1");
+        let balanceBeforeBn;
         
         beforeEach(async () => {
+            await acc1.getBalance()
             const purchaseTokenTx = await tokenSaleContract.connect(acc2).purchaseTokens({value: amountToBeSentBn});
             await purchaseTokenTx.wait();
         });
         
         it("charges the correct amount of ETH", async () => {
-            const balanceAfterBn = await acc1.getBalance();
-            const diff = balanceBeforeBn.sub(balanceAfterBn);
-            const expectedDiff = amountToBeSentBn.add(gasCost)
-            const error = diff.sub(expectedDiff);
-            expect(error).to.eq(0);
+            
         });
         
 
@@ -69,36 +67,15 @@ describe("NFT Shop", () => {
     })
     
     describe("When a user burns an ERC20 at the Token contract", () => {
-        let gasCost: BigNumber;
-        let approveGasCost: BigNumber
-
-        beforeEach(async () => {
-            const approveTx = await erc20Token.connect(acc1).approve(tokenSaleContract.address, amountToBeRecived)
-            const approveTxReceipt = await approveTx.wait()
-            const burnTokenTx = await tokenSaleContract.connect(acc2).burnTokens(amountToBeRecived);
-            const txReceipt = await burnTokenTx.wait();
-            const gasUnitUsed = txReceipt.gasUsed;
-            const gasPrice = txReceipt.effectiveGasPrice;
-            gasCost = gasUnitUsed.mul(gasPrice);
-            const approveGasUnitUsed = txReceipt.gasUsed;
-            const gasPrice = txReceipt.effectiveGasPrice;
-            gasCost = gasUnitUsed.mul(gasPrice);
-        });
+        
 
         it("gives the correct amount of ETH", async () => {
-            const balanceAfterBn = await acc1.getBalance();
-            const diff = balanceBeforeBn.sub(balanceAfterBn);
-            const expectedDiff = purchaseGasCosts.add(approveGasCosts).add(burnGasCost);
-            const error = expectedDiff.sub(diff);
-            expect(error).to.eq(0);
+           
 
         });
 
         it("burns the correct amount of tokens", async () => {
-            const acc1Balance = await erc20Token.balanceOf(acc1.address);
-            expect(acc1Balance).to.eq(0);
-            const totalSupply = await erc20Token.totalSupply();
-            expect(totalSupply).to.eq(0);
+            
 
         });
     });
