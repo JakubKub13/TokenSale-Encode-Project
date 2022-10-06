@@ -97,7 +97,9 @@ describe("NFT Shop", () => {
             });
 
             it("gives the correct amount of ETH", async () => {
-           
+                const balanceAfterBn = await acc2.getBalance();
+                const diff = balanceBeforeBn.sub(balanceAfterBn);
+                
 
             });
 

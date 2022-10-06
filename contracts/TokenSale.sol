@@ -29,7 +29,7 @@ contract TokenSale {
 
     function burnTokens(uint256 amount) public {
         paymentToken.burnFrom(msg.sender, amount);
-        uint256 ethToBeReturned = amount / erc20Purchaseratio;
+        uint256 ethToBeReturned = amount * erc20Purchaseratio;
         payable(msg.sender).transfer(ethToBeReturned);
     }
 
