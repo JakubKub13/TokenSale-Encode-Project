@@ -1,18 +1,26 @@
 import { ethers } from "hardhat";
+import * as dotenv from "dotenv";
+import { MyERC20__factory, TokenSale__factory } from "../typechain-types";
+dotenv.config();
+
+const ERC20_TOKEN_RATIO = 5;
+const NFT_TOKEN_PRICE = 0.1;
+const ERC20_CONTRACT_ADDRESS = "0x123";
+const ERC721_CONTRACT_ADDRESS = "0x333";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
-
-  const lockedAmount = ethers.utils.parseEther("1");
-
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  // Deploy using ethers
+  const provider = ethers.getDefaultProvider("goerli");
+  const wallet = ethers.Wallet.createRandom();
+  const signer = wallet.connect(provider);
+  const tokenSaleContractFactory = new TokenSale__factory(signer);
+  const tokenSaleContract = await tokenSaleContractFactory.deploy(ERC20_TOKEN_RATIO, NFT_TOKEN_PRICE, ERC20_CONTRACT_ADDRESS, ERC721_CONTRACT_ADDRESS  );
+  await tokenSaleContract.deployed();
+  const erc20TokenFactory = new MyERC20__factory(signer);
+  const erc20Token = erc20TokenFactory.attach("0x addr of tokendeployed")
+  const MINTER_ROLE = await ERC20_TOKEN_RATIO.MINTER_ROLE();
+  const grantRoleTx = await ERC20_TOKEN_RATIO.grantRole(MINTER_ROLE, tokenSaleContract.address);
+  await grantRoleTx.wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -2,7 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { MyERC20, TokenSale } from "../typechain-types";
+import { ERC721, MyERC20, TokenSale,  } from "../typechain-types";
 
 const ERC20_TOKEN_RATIO = 5;
 const NFT_TOKEN_PRICE = 0.1;
@@ -10,6 +10,7 @@ const NFT_TOKEN_PRICE = 0.1;
 describe("NFT Shop", () => {
     let tokenSaleContract: TokenSale;
     let erc20Token: MyERC20;
+    let erc721Token: ERC721;
     let deployer: SignerWithAddress;
     let acc1: SignerWithAddress;
     let acc2: SignerWithAddress;
@@ -19,8 +20,11 @@ describe("NFT Shop", () => {
         const erc20TokenFactory = await ethers.getContractFactory("MyERC20")
         erc20Token = await erc20TokenFactory.deploy();
         await erc20Token.deployed();
+        const erc721TokenFactory = await ethers.getContractFactory("MyERC721");
+        erc721Token = await erc721TokenFactory.deploy();
+        await erc721Token.deployed();
         const tokenSaleContractFactory = await ethers.getContractFactory("TokenSale");
-        tokenSaleContract = await tokenSaleContractFactory.deploy(ERC20_TOKEN_RATIO, NFT_TOKEN_PRICE, erc20Token.address);
+        tokenSaleContract = await tokenSaleContractFactory.deploy(ERC20_TOKEN_RATIO, NFT_TOKEN_PRICE, erc20Token.address, erc721Token.address);
         await tokenSaleContract.deployed();
         const MINTER_ROLE = await erc20Token.MINTER_ROLE();
         const grantRoleTx = await erc20Token.grantRole(MINTER_ROLE, tokenSaleContract.address);
@@ -114,7 +118,7 @@ describe("NFT Shop", () => {
     
 
         describe("When a user purchase a NFT from the Shop contract", () => {
-            it("charges the correct amount of ETH", () => {
+            it("charges the correct amount of ERC20 tokens", async () => {
                 throw new Error("Not implemented");
             });
 
