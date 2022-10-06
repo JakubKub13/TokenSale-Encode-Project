@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { MyERC20, TokenSale } from "../typechain-types";
 
 const ERC20_TOKEN_RATIO = 5;
-const ERC20_TOKEN_PRICE = 0.1;
+const NFT_TOKEN_PRICE = 0.1;
 
 describe("NFT Shop", () => {
     let tokenSaleContract: TokenSale;
@@ -20,7 +20,7 @@ describe("NFT Shop", () => {
         erc20Token = await erc20TokenFactory.deploy();
         await erc20Token.deployed();
         const tokenSaleContractFactory = await ethers.getContractFactory("TokenSale");
-        tokenSaleContract = await tokenSaleContractFactory.deploy(ERC20_TOKEN_RATIO, erc20Token.address);
+        tokenSaleContract = await tokenSaleContractFactory.deploy(ERC20_TOKEN_RATIO, NFT_TOKEN_PRICE, erc20Token.address);
         await tokenSaleContract.deployed();
         const MINTER_ROLE = await erc20Token.MINTER_ROLE();
         const grantRoleTx = await erc20Token.grantRole(MINTER_ROLE, tokenSaleContract.address);
@@ -99,8 +99,9 @@ describe("NFT Shop", () => {
             it("gives the correct amount of ETH", async () => {
                 const balanceAfterBn = await acc2.getBalance();
                 const diff = balanceBeforeBn.sub(balanceAfterBn);
-                
-
+                const expectedDiff = purchaseGasCosts.add(approveGasCosts).add(burnGasCosts);
+                const error = expectedDiff.sub(diff);
+                expect(error).to.eq(0);
             });
 
             it("burns the correct amount of tokens", async () => {
