@@ -1,5 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { MyERC20, TokenSale } from "../typechain-types";
 
@@ -40,15 +41,27 @@ describe("NFT Shop", () => {
         });
     });
 
-    describe("When a user purchase an ERC20 from the Token contract", () => {
+    describe("When a user purchase an ERC20 from the Token contract", async () => {
         let amountToBeSentBn = ethers.utils.parseEther("1");
+        const amountToBeRecived = amountToBeSentBn.div(ERC20_TOKEN_RATIO);
+        let balanceBeforeBn: BigNumber;
+        let gasCost: BigNumber;
+
         beforeEach(async () => {
+            balanceBeforeBn = await acc1.getBalance();
             const purchaseTokenTx = await tokenSaleContract.connect(acc2).purchaseTokens({value: amountToBeSentBn});
-            await purchaseTokenTx.wait();
+            const txReceipt = await purchaseTokenTx.wait();
+            const gasUnitUsed = txReceipt.gasUsed;
+            const gasPrice = txReceipt.effectiveGasPrice;
+            gasCost = gasUnitUsed.mul(gasPrice);
         });
-        
+        // check this
         it("charges the correct amount of ETH", async () => {
-            throw new Error("Not implemented");
+            const balanceAfterBn = await acc1.getBalance();
+            const diff = balanceBeforeBn.sub(balanceAfterBn);
+            const expectedDiff = amountToBeSentBn.add(gasCost)
+            const error = diff.sub(expectedDiff);
+            expect(error).to.eq(0);
         });
         
 
@@ -58,15 +71,31 @@ describe("NFT Shop", () => {
         });
     })
     
-  describe("When a user burns an ERC20 at the Token contract", () => {
-    it("gives the correct amount of ETH", () => {
-      throw new Error("Not implemented");
-    });
+    describe("When a user burns an ERC20 at the Token contract", () => {
+        let gasCost: BigNumber;
+        let approveGasCost: BigNumber
 
-    it("burns the correct amount of tokens", () => {
-      throw new Error("Not implemented");
+        beforeEach(async () => {
+            const approveTx = await erc20Token.connect(acc1).approve(tokenSaleContract.address, amountToBeRecived)
+            const approveTxReceipt = await approveTx.wait()
+            const burnTokenTx = await tokenSaleContract.connect(acc2).burnTokens(amountToBeRecived);
+            const txReceipt = await burnTokenTx.wait();
+            const gasUnitUsed = txReceipt.gasUsed;
+            const gasPrice = txReceipt.effectiveGasPrice;
+            gasCost = gasUnitUsed.mul(gasPrice);
+            const approveGasUnitUsed = txReceipt.gasUsed;
+            const gasPrice = txReceipt.effectiveGasPrice;
+            gasCost = gasUnitUsed.mul(gasPrice);
+        });
+
+        it("gives the correct amount of ETH", () => {
+            throw new Error("Not implemented");
+        });
+
+        it("burns the correct amount of tokens", () => {
+        throw new Error("Not implemented");
+        });
     });
-  });
 
   describe("When a user purchase a NFT from the Shop contract", () => {
     it("charges the correct amount of ETH", () => {
