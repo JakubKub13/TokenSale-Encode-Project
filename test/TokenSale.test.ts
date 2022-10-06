@@ -47,6 +47,7 @@ describe("NFT Shop", () => {
 
     describe("When a user purchase an ERC20 from the Token contract", async () => {
         const amountToBeSentBn = ethers.utils.parseEther("1");
+        const amountToBeReceived = amountToBeSentBn.div(ERC20_TOKEN_RATIO);
         let balanceBeforeBn: BigNumber;
         let gasCosts: BigNumber;
         
@@ -70,26 +71,36 @@ describe("NFT Shop", () => {
 
         it("gives the correct amount of tokens", async () => {
             const acc2Balance = await erc20Token.balanceOf(acc2.address);
-            expect(acc2Balance).to.eq(amountToBeSentBn.div(ERC20_TOKEN_RATIO));
+            expect(acc2Balance).to.eq(amountToBeReceived);
         });
 
         it("Increases the balance of ETH in the contract", async () => {
             const contractBalanceBn = await ethers.provider.getBalance(tokenSaleContract.address);
             expect(contractBalanceBn).to.eq(amountToBeSentBn);
         });
-    });
     
-    describe("When a user burns an ERC20 at the Token contract", () => {
+    
+        describe("When a user burns an ERC20 at the Token contract", () => {
+            let balanceBeforeBn: BigNumber;
+            let gasCosts: BigNumber;
         
+            beforeEach(async () => {
+                const burnTokenTx = await tokenSaleContract.connect(acc2).burnTokens(amountToBeReceived);
+                const burnTokensTxReceipt = await burnTokenTx.wait();
+                const gasUnitUsed = burnTokensTxReceipt.gasUsed;
+                const gasPrice = burnTokensTxReceipt.effectiveGasPrice;
+                gasCosts = gasUnitUsed.mul(gasPrice);
+            });
 
-        it("gives the correct amount of ETH", async () => {
+            it("gives the correct amount of ETH", async () => {
            
 
-        });
+            });
 
-        it("burns the correct amount of tokens", async () => {
+            it("burns the correct amount of tokens", async () => {
             
 
+            });
         });
     });
 
