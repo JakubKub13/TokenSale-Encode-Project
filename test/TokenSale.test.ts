@@ -47,16 +47,24 @@ describe("NFT Shop", () => {
 
     describe("When a user purchase an ERC20 from the Token contract", async () => {
         const amountToBeSentBn = ethers.utils.parseEther("1");
-        let balanceBeforeBn;
+        let balanceBeforeBn: BigNumber;
+        let gasCosts: BigNumber;
         
         beforeEach(async () => {
-            await acc1.getBalance()
+            balanceBeforeBn = await acc1.getBalance();
             const purchaseTokenTx = await tokenSaleContract.connect(acc2).purchaseTokens({value: amountToBeSentBn});
-            await purchaseTokenTx.wait();
+            const purchaseTokenTxReceipt = await purchaseTokenTx.wait();
+            const gasUnitUsed = purchaseTokenTxReceipt.gasUsed;
+            const gasPrice = purchaseTokenTxReceipt.effectiveGasPrice;
+            gasCosts = gasUnitUsed.mul(gasPrice);
         });
         
         it("charges the correct amount of ETH", async () => {
-            
+            const balanceAfterBn = await acc1.getBalance();
+            const diff = balanceBeforeBn.sub(balanceAfterBn);
+            const expectedDiff = amountToBeSentBn;
+            const error = diff.sub(expectedDiff);
+            expect(error).to.eq(0);
         });
         
 
