@@ -2,6 +2,7 @@
 pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface IMyERC20Token is IERC20 {
     function mint(address to, uint256 amount) external;
@@ -14,7 +15,7 @@ contract TokenSale {
     uint256 public tokenPrice;
     IMyERC20Token public paymentToken;
 
-    constructor(uint256 _ratio, uint256 _tokenPrice, address _paymentToken) {
+    constructor(uint256 _ratio, uint256 _tokenPrice, address _paymentToken, address _nftContract) {
         erc20Purchaseratio = _ratio;
         tokenPrice = _tokenPrice;
         paymentToken = IMyERC20Token(_paymentToken);

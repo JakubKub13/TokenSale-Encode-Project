@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { MyERC20, TokenSale } from "../typechain-types";
 
 const ERC20_TOKEN_RATIO = 5;
+const ERC20_TOKEN_PRICE = 0.1;
 
 describe("NFT Shop", () => {
     let tokenSaleContract: TokenSale;
@@ -34,8 +35,11 @@ describe("NFT Shop", () => {
 
         it("uses a valid ERC20 as payment token", async () => {
             const paymentTokenAddress = await tokenSaleContract.paymentToken();
+            expect(paymentTokenAddress).to.eq(erc20Token.address);
             const erc20TokenFactory = await ethers.getContractFactory("MyERC20");
             const paymentTokenContract = erc20TokenFactory.attach(paymentTokenAddress);
+            const myBalance = await paymentTokenContract.balanceOf(deployer.address);
+            expect(myBalance).to.eq(0);
             const totalSupply = await paymentTokenContract.totalSupply();
             expect(totalSupply).to.eq(0)
         });
@@ -43,19 +47,12 @@ describe("NFT Shop", () => {
 
     describe("When a user purchase an ERC20 from the Token contract", async () => {
         let amountToBeSentBn = ethers.utils.parseEther("1");
-        const amountToBeRecived = amountToBeSentBn.div(ERC20_TOKEN_RATIO);
-        let balanceBeforeBn: BigNumber;
-        let gasCost: BigNumber;
-
+        
         beforeEach(async () => {
-            balanceBeforeBn = await acc1.getBalance();
             const purchaseTokenTx = await tokenSaleContract.connect(acc2).purchaseTokens({value: amountToBeSentBn});
-            const txReceipt = await purchaseTokenTx.wait();
-            const gasUnitUsed = txReceipt.gasUsed;
-            const gasPrice = txReceipt.effectiveGasPrice;
-            gasCost = gasUnitUsed.mul(gasPrice);
+            await purchaseTokenTx.wait();
         });
-        // check this
+        
         it("charges the correct amount of ETH", async () => {
             const balanceAfterBn = await acc1.getBalance();
             const diff = balanceBeforeBn.sub(balanceAfterBn);
@@ -88,12 +85,21 @@ describe("NFT Shop", () => {
             gasCost = gasUnitUsed.mul(gasPrice);
         });
 
-        it("gives the correct amount of ETH", () => {
-            throw new Error("Not implemented");
+        it("gives the correct amount of ETH", async () => {
+            const balanceAfterBn = await acc1.getBalance();
+            const diff = balanceBeforeBn.sub(balanceAfterBn);
+            const expectedDiff = purchaseGasCosts.add(approveGasCosts).add(burnGasCost);
+            const error = expectedDiff.sub(diff);
+            expect(error).to.eq(0);
+
         });
 
-        it("burns the correct amount of tokens", () => {
-        throw new Error("Not implemented");
+        it("burns the correct amount of tokens", async () => {
+            const acc1Balance = await erc20Token.balanceOf(acc1.address);
+            expect(acc1Balance).to.eq(0);
+            const totalSupply = await erc20Token.totalSupply();
+            expect(totalSupply).to.eq(0);
+
         });
     });
 
